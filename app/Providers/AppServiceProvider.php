@@ -23,6 +23,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        if (env('HTTPS_ON') == 'true') {
+            $this->app['request']->server->set('HTTPS', true);
+        }
     }
 }
