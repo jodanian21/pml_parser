@@ -7,6 +7,12 @@ use Exception;
 
 class PMLParser
 {
+    const MAX_PIZZA_COUNT = 24;
+
+    const MAX_TOPPINGS_COUNT = 12;
+
+    const MAX_TOPPINGS_TAG_COUNT = 3;
+
     private $pmlString;
 
     private $xml;
@@ -36,17 +42,17 @@ class PMLParser
      * Convert to XML format for easy traversal
      */
     public function convertToXML() {
-        $start = preg_replace("/{/", "<", $this->pmlString);
-        $end = preg_replace("/}/", ">", $start);
+        $xml = preg_replace("/{/", "<", $this->pmlString);
+        $xml = preg_replace("/}/", ">", $xml);
 
-        $checker =  preg_replace("/>/", "}", preg_replace("/</", "{", $end));
-
+        $checker =  preg_replace("/>/", "}", preg_replace("/</", "{", $xml));
+        // check for angle tags if added
         if ($checker <> $this->pmlString) {
             throw new RuntimeException("Invalid PML format!");
         }
-
-        $xmlStr = "<?xml version='1.0' encoding='UTF-8'?>" . $end;
-
+        // append xml parent tag
+        $xmlStr = "<?xml version='1.0' encoding='UTF-8'?>" . $xml;
+        // enable xml parsing errors
         libxml_use_internal_errors(true);
         $xml = simplexml_load_string($xmlStr);
 
@@ -72,17 +78,35 @@ class PMLParser
             throw new RuntimeException('Order number is not set!');
         }
 
-        // validate pizza
+        if (
+            $this->xml->attributes()['number'] <>
+            (string) intval($this->xml->attributes()['number'])
+        ) {
+            throw new RuntimeException('Order Number invalid type!');
+        }
+
+        // validate pizza tags
         $numbers = [];
         $previous = 0;
 
+        if (!isset($this->xml->pizza)) {
+            throw new RuntimeException('Pizza not set!');
+        }
+
         foreach ($this->xml->children() as $pizza) {
             if ($pizza->getName() <> "pizza") {
-                throw new RuntimeException('Unknown tag is present in PML body!');
+                throw new RuntimeException('Unknown tag is present in Order body!');
             }
 
             if (!isset($pizza->attributes()['number'])) {
-                throw new RuntimeException('Pizza number is not set!');
+                throw new RuntimeException(' number is not set!');
+            }
+
+            if (
+                $pizza->attributes()['number'] <> 
+                (string) intval($pizza->attributes()['number'])
+            ) {
+                throw new RuntimeException('Pizza Number invalid type!');
             }
 
             $current = $pizza->attributes()->{'number'};
@@ -94,13 +118,13 @@ class PMLParser
                 throw new RuntimeException('Pizza number not in order!');
             }
 
+            // validate pizza children tags
             $this->validatePizzaFormat($pizza);
 
             $numbers[] = $previous = $current;
         }
 
-
-        if (count($this->xml->children()) > 24) {
+        if (count($this->xml->children()) > self::MAX_PIZZA_COUNT) {
             throw new RuntimeException('Pizza limit has been reached!');
         }
     }
@@ -110,14 +134,22 @@ class PMLParser
      */
     private function validatePizzaFormat($pizza)
     {
+        // check allowed tags in pizza body
         foreach ($this->pizzaNodeList as $node) {
             if (!isset($pizza->{$node}) && $node <> "toppings") {
                 throw new RuntimeException(
                     "Missing $node tag in pizza #{$pizza->attributes()->{'number'}} body!"
                 );
             }
+
+            if (empty($pizza->{$node}) && $node <> "toppings") {
+                throw new RuntimeException(
+                    "No value for $node tag in pizza #{$pizza->attributes()->{'number'}} body!"
+                );
+            }
         }
 
+        // check children nodes
         foreach ($pizza->children() as $node) {
             if (!in_array($node->getName(), $this->pizzaNodeList)) {
                 throw new RuntimeException(
@@ -125,6 +157,7 @@ class PMLParser
                 );
             }
 
+            // check for duplicate tags
             if (
                 $node->getName() <> "toppings"
                 && count($pizza->{$node->getName()}) > 1
@@ -134,20 +167,20 @@ class PMLParser
                 );
             }
 
+            // check of custom pizza has no toppings
             if (
-                $node->getName() == "size"
-                && $pizza->type == "custom"
-                && empty($pizza->toppings)
+                $pizza->type == "custom"
+                && !isset($pizza->toppings)
             ) {
                 throw new RuntimeException("
                     Missing toppings tag in pizza #{$pizza->attributes()->{'number'}}!"
                 );
             }
 
+            // check if reach topping limit
             if (
-                $node->getName() == "size"
-                && $pizza->type == "custom"
-                && count($pizza->toppings) > 3
+                $pizza->type == "custom"
+                && count($pizza->toppings) > self::MAX_TOPPINGS_TAG_COUNT
             ) {
                 throw new RuntimeException("
                     Toppings limit reached in pizza #{$pizza->attributes()->{'number'}}!"
@@ -166,46 +199,48 @@ class PMLParser
      */
     private function validateToppings($pizza, $pizzaNumber)
     {
-        $previousArea = -1;
-
-        if (count($pizza->toppings) > 12) {
+        // check if topping tag count limit is reached
+        if (count($pizza->toppings) > self::MAX_TOPPINGS_COUNT) {
             throw new RuntimeException("
-                Toppings limit reached in pizza #{$pizzaNumber}!"
+            Toppings limit reached in pizza #{$pizzaNumber}!"
             );
         }
-
+        
+        // check for area property of toppings
+        $previousArea = [];
         foreach($pizza->toppings as $toppings) {
             if (!isset($toppings->attributes()->{'area'})) {
                 throw new RuntimeException("
-                    Missing toppings area pizza #{$pizzaNumber}!"
+                    Toppings area not set in pizza #{$pizzaNumber}!"
                 );
             }
 
+            // check for correct value of toppings
             $currentArea = $toppings->attributes()->{'area'};
-
             if (
-                $currentArea < 0 
+                $currentArea < 0
                 || $currentArea > 2
-            ) {
-                throw new RuntimeException(
-                    "Unknown Toppings area in pizza #{$pizzaNumber} toppings!"
+                ) {
+                    throw new RuntimeException(
+                    "Unknown toppings area in pizza #{$pizzaNumber} toppings!"
                 );
             }
-
             
-            if (($currentArea - $previousArea) <> 1) {
+            // check if order of toppings area is correct
+            if (in_array(intval($currentArea), $previousArea)) {
                 throw new RuntimeException("
-                    Toppings area not in order in pizza #{$pizzaNumber}!"
+                    Duplicate toppings area in pizza #{$pizzaNumber}!"
                 );
             }
     
+            // check if no items tag
             if (count($toppings) == 0) {
                 throw new RuntimeException("
                     Missing item in pizza #{$pizzaNumber} toppings!"
                 );
             }
 
-            $previousArea = $currentArea;
+            $previousArea[] = intval($currentArea);
         }
     }
 } 

@@ -55,7 +55,7 @@ class OrderService
                 }
             }
             // save all toppings
-            $pizzaRecord[0]->topping_details()->createMany($forSaving);
+            DB::table('topping_details')->insert($forSaving);
 
         } catch (Throwable $e) {
             DB::rollBack();

@@ -4,10 +4,10 @@
 
 @include('component.sidebar', ['toppings' => $toppings])
 
-<span style="font-size:20px;cursor:pointer" id="myMenu" onclick="openToppings()">&#9776; Toppings</span>
+<span style="font-size:16px;cursor:pointer" id="myMenu" class="btn btn-success" onclick="openToppings()">&#9776; View Toppings</span>
 
 <div class="mt-5">
-    <h3><i class="fa fa-list"></i> Order List</h3>
+    <h3><strong>Order List</strong></h3>
     <hr>
     <table class="table table-bordered table-condensed">
         <thead>

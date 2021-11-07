@@ -2,9 +2,11 @@
 
 @section('content')
 <div class="row justify-content-md-center">
-    <div class="col col-md-5" id="content">
+    <div class="col col-md-5">
         <div class="card">
             <div class="card-header">
+                <div id="status" class="alert alert-danger" role="alert" style="display: none">
+                </div>
                 <form id="uploadFile">
                     <label class="btn btn-primary btn-block" id="btnBrowse">
                         <i class="fa fa-upload"></i> Browse <input id="inputFile" type="file" hidden>
@@ -23,10 +25,8 @@
                     </span>
                 </div>
             </div>
-            <div class="card-footer">
-                <div id="status" class="alert alert-danger" role="alert" style="display: none">
-                </div>
-            </div>
+        </div>
+        <div id="content">
         </div>
     </div>
 </div>
@@ -40,6 +40,7 @@
     if (input) {
         input.addEventListener('change', function (e) {
             let message = document.querySelector("#filesUploaded");
+            let content = document.getElementById("content");
             var fileName = e.target.files[0].name;
 
             let name = document.querySelector("#filename");
@@ -48,6 +49,7 @@
             toggleSave(true);
             toggleStatus(false);
             getFileContent(e.target.files[0])
+            content.innerHTML = ""
         });
     }
 
@@ -68,6 +70,7 @@
         let message = document.querySelector("#filesUploaded");
         message.style.display = "none";
         toggleSave(false);
+        toggleStatus(false);
     }
 
     form.addEventListener('submit', function(e) {
