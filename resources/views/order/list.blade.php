@@ -1,3 +1,7 @@
+@php
+use App\Constants\Size;
+@endphp
+
 @extends('layouts.default')
 
 @section('content')
@@ -24,9 +28,9 @@
                     <div class="col-sm-2 m-1">
                         <select name="size" class="form-control">
                             <option value="" disabled {{ empty($query['size']) ? 'selected' : '' }}>Size</option>
-                            <option {{ !empty($query['size']) && $query['size'] == 'small' ? 'selected' : '' }}>small</option>
-                            <option {{ !empty($query['size']) && $query['size'] == 'medium' ? 'selected' : '' }}>medium</option>
-                            <option {{ !empty($query['size']) && $query['size'] == 'large' ? 'selected' : '' }}>large</option>
+                            @foreach (Size::all as $size)
+                            <option {{ !empty($query['size']) && $query['size'] == $size ? 'selected' : '' }}> {{ $size }}</option>
+                            @endforeach
                         </select>
                     </div>
 

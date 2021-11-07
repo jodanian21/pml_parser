@@ -1,6 +1,7 @@
 @extends('layouts.default')
 
 @section('content')
+
 <div class="row justify-content-md-center">
     <div class="col col-md-5">
         <div class="card">
@@ -9,7 +10,7 @@
                 </div>
                 <form id="uploadFile">
                     <label class="btn btn-primary btn-block" id="btnBrowse">
-                        <i class="fa fa-upload"></i> Browse <input id="inputFile" type="file" hidden>
+                        <i class="fa fa-upload"></i> Upload <input id="inputFile" type="file" hidden>
                     </label>
                     <button type="submit" id="btnSave" class="btn btn-success btn-block" style="display:none">
                         <i class="fa fa-save"></i> Save
@@ -30,6 +31,7 @@
         </div>
     </div>
 </div>
+
 @endsection
 
 @push('scripts')
@@ -151,16 +153,15 @@
                 renderData(data);
                 form.reset();
             }).catch(err => {
+                var msg = "Something Went wrong!"
                 if (
                     typeof err.response != "undefined"
                     && err.response.status === 422
                 ) {
-                    toggleStatus(
-                        true,
-                        err.response.data.message
-                    );
+                    msg = err.response.data.message
                 }
-
+                
+                toggleStatus(true, msg);
                 console.log(err)
             })
     }

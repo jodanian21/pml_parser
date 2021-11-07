@@ -27,9 +27,15 @@ class OrdersController extends Controller
      */
     public function manualInput()
     {
-        $toppings = MstTopping::all();
+        $toppings = MstTopping::getToppingsCount()->get();
+        $crusts = Crust::all();
+        $types = Type::all();
 
-        return view('order.input', compact('toppings'));
+        return view('order.input', compact(
+            'toppings',
+            'crusts',
+            'types'
+        ));
     }
 
     /**

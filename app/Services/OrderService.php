@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Constants\Size;
 use App\Models\{
     Crust,
     MstTopping,
@@ -17,12 +18,6 @@ use Throwable;
 
 class OrderService
 {
-    protected $size = [
-        "small",
-        "medium",
-        "large",
-    ];
-
     protected $crust;
 
     protected $type;
@@ -59,8 +54,8 @@ class OrderService
                 $pizzas[] = $pizza;
 
                 $this->validateSize($pizza['size']);
-                $this->validateCrust($pizza['size']);
-                $this->validateType($pizza['size']);
+                $this->validateCrust($pizza['crust']);
+                $this->validateType($pizza['type']);
 
                 $toppings[$pizza['number']] = $this->arrangeToppings($pizza['toppings'], $mstToppings);
             }
@@ -113,7 +108,7 @@ class OrderService
      */
     private function validateSize($value)
     {
-        if (!in_array($value, $this->size)) {
+        if (!in_array($value, Size::all)) {
             throw new RuntimeException("Unknown Size in Pizza!");
         }
     }
@@ -127,7 +122,7 @@ class OrderService
             $this->crust = Crust::all();
         }
 
-        if (empty($this->crust->firstWhere('name',$value))) {
+        if (empty($this->crust->firstWhere('name', $value))) {
             throw new RuntimeException("Unknown Crust in Pizza!");
         }
     }
@@ -141,7 +136,7 @@ class OrderService
             $this->type = Type::all();
         }
 
-        if (empty($this->type->firstWhere('name',$value))) {
+        if (empty($this->type->firstWhere('name', $value))) {
             throw new RuntimeException("Unknown type in Pizza!");
         }
     }

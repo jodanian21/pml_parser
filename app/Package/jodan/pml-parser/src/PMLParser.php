@@ -2,6 +2,7 @@
 
 namespace Jodan\PMLParser;
 
+use App\Constants\Size;
 use RuntimeException;
 use Exception;
 
@@ -13,12 +14,6 @@ class PMLParser
 
     const MAX_TOPPINGS_TAG_COUNT = 3;
 
-    const PIZZA_SIZE = [
-        "small",
-        "medium",
-        "large"
-    ];
-
     private $pizzaNodeList = [
         "size",
         "crust",
@@ -29,7 +24,6 @@ class PMLParser
     private $pmlString;
 
     private $xml;
-
 
     /**
      * Main parser method

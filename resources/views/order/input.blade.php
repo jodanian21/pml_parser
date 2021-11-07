@@ -1,7 +1,58 @@
 @extends('layouts.default')
 
 @section('content')
-<div class="row justify-content-md-center">
+
+@include('component.options', compact(
+    'toppings',
+    'crusts',
+    'types'
+))
+
+<span style="cursor:pointer" id="myMenu" class="btn btn-success" onclick="openToppings()">&#9776; Pizza Options</span>
+<button type="button" class="btn btn-primary float-right" data-toggle="modal" data-target="#sampleFormat">
+    Sample Format
+  </button>
+
+<div class="modal fade" id="sampleFormat" tabindex="-1" role="dialog" aria-labelledby="sampleFormatLabel" aria-hidden="true">
+<div class="modal-dialog" role="document">
+    <div class="modal-content">
+    <div class="modal-header">
+        <h5 class="modal-title" id="sampleFormatLabel">Sample PML Format</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+    <pre class="text-muted">
+{order number="123"}
+    {pizza number="1"}
+        {size}large{/size}
+        {crust}hand-tossed{/crust}
+        {type}custom{/type}
+        {toppings area="0"}
+            {item}pepperoni{/item}
+            {item}extra cheese{/item}
+        {/toppings}
+        {toppings area="1"}
+            {item}sausage{/item}
+        {/toppings}
+        {toppings area="0"}
+            {item}mushrooms{/item}
+        {/toppings}
+    {/pizza}
+    {pizza number="2"}
+        {size}medium{/size}
+        {crust}deep dish{/crust}
+        {type}pepperoni{/type}
+    {/pizza}
+{/order}
+    </pre>
+    </div>
+    </div>
+</div>
+</div>
+
+<div class="row justify-content-md-center mt-2">
     <div class="col col-md-5">
         <div class="card">
             <div class="card-header">
@@ -26,6 +77,7 @@
         </div>
     </div>
 </div>
+
 @endsection
 
 @push('scripts')
@@ -78,18 +130,31 @@
                 localStorage.setItem("status", "Successfully Saved Order!");
                 location.reload();
             }).catch(err => {
+                var msg = "Something Went wrong!"
                 if (
                     typeof err.response != "undefined"
                     && err.response.status === 422
                 ) {
-                    toggleStatus(
-                        true,
-                        err.response.data.message
-                    );
+                    msg = err.response.data.message
                 }
-
+                
+                toggleStatus(true, msg);
                 console.log(err)
             })
     }
+    </script>
+@endpush
+
+@push('scripts')
+    <script>
+        function openToppings() {
+            document.getElementById("options").style.width = "50vw";
+        }
+
+        window.addEventListener('click', function(e) {
+            if (!document.getElementById('options').contains(e.target) && !document.getElementById('myMenu').contains(e.target)){
+                document.getElementById("options").style.width = "0px";
+            }
+        });
     </script>
 @endpush
