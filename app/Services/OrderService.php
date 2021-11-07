@@ -2,7 +2,12 @@
 
 namespace App\Services;
 
-use App\Models\{MstTopping, Order};
+use App\Models\{
+    Crust,
+    MstTopping,
+    Order,
+    Type
+};
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Jodan\PMLParser\PMLObject;
@@ -12,6 +17,16 @@ use Throwable;
 
 class OrderService
 {
+    protected $size = [
+        "small",
+        "medium",
+        "large",
+    ];
+
+    protected $crust;
+
+    protected $type;
+
     /**
      * Data store
      * 
@@ -42,6 +57,11 @@ class OrderService
             $pizzas = [];
             foreach ($pmlObj->getPizzaFields() as $pizza) {
                 $pizzas[] = $pizza;
+
+                $this->validateSize($pizza['size']);
+                $this->validateCrust($pizza['size']);
+                $this->validateType($pizza['size']);
+
                 $toppings[$pizza['number']] = $this->arrangeToppings($pizza['toppings'], $mstToppings);
             }
             // save all pizzas
@@ -86,5 +106,43 @@ class OrderService
         }
 
         return $temp;
+    }
+
+    /**
+     * Validates size value of pizza
+     */
+    private function validateSize($value)
+    {
+        if (!in_array($value, $this->size)) {
+            throw new RuntimeException("Unknown Size in Pizza!");
+        }
+    }
+
+    /**
+     * Validates crust value of pizza
+     */
+    private function validateCrust($value)
+    {
+        if (empty($this->crust)) {
+            $this->crust = Crust::all();
+        }
+
+        if (empty($this->crust->firstWhere('name',$value))) {
+            throw new RuntimeException("Unknown Crust in Pizza!");
+        }
+    }
+
+    /**
+     * Validates type value of pizza
+     */
+    private function validateType($value)
+    {
+        if (empty($this->type)) {
+            $this->type = Type::all();
+        }
+
+        if (empty($this->type->firstWhere('name',$value))) {
+            throw new RuntimeException("Unknown type in Pizza!");
+        }
     }
 }

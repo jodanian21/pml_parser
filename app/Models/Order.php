@@ -63,6 +63,10 @@ class Order extends Model
             ])
             ->join('pizzas', 'pizzas.order_id', '=', 'orders.id')
             ->leftJoin('topping_details', 'pizzas.id', '=', 'topping_details.pizza_id')
+            ->orderBy('orders.created_at', $params['order'] ?? 'asc')
+            ->groupBy('orders.id')
+
+            // search parameters
             ->when(!empty($params['size']), function ($query) use ($params) {
                 $query->where('size', $params['size']);
             })
@@ -75,10 +79,11 @@ class Order extends Model
             ->when(!empty($params['type']), function ($query) use ($params) {
                 $query->where('size', $params['size']);
             })
-            ->groupBy('orders.id')
             ->when(!empty($params['toppings']), function ($query) use ($params) {
                 $query->havingRaw("total >= " . $params['toppings']);
             })
+
+            // load relationships
             ->with([
                 'pizzas',
                 'topping_details'
