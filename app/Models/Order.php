@@ -71,13 +71,10 @@ class Order extends Model
                 $query->where('size', $params['size']);
             })
             ->when(!empty($params['crust']), function ($query) use ($params) {
-                $query->where('size', $params['size']);
+                $query->where('crust', $params['crust']);
             })
             ->when(!empty($params['type']), function ($query) use ($params) {
-                $query->where('size', $params['size']);
-            })
-            ->when(!empty($params['type']), function ($query) use ($params) {
-                $query->where('size', $params['size']);
+                $query->where('type', $params['type']);
             })
             ->when(!empty($params['toppings']), function ($query) use ($params) {
                 $query->havingRaw("total >= " . $params['toppings']);
