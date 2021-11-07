@@ -9,6 +9,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class Order
@@ -28,13 +29,11 @@ class Order extends Model
     protected $table = 'orders';
 
     protected $casts = [
-        'number' => 'int',
-        'pizza_id' => 'int'
+        'number' => 'int'
     ];
 
     protected $fillable = [
         'number',
-        'pizza_id'
     ];
 
     public function pizzas()
@@ -55,8 +54,34 @@ class Order extends Model
             ->orderBy('area');
     }
 
-    public static function getOrderList()
+    public static function getOrderList($params = [])
     {
-        return self::with(['pizzas', 'topping_details']);
+        return self::select([
+                'orders.id',
+                'orders.number',
+                DB::raw('count(topping_details.id) as total')
+            ])
+            ->join('pizzas', 'pizzas.order_id', '=', 'orders.id')
+            ->leftJoin('topping_details', 'pizzas.id', '=', 'topping_details.pizza_id')
+            ->when(!empty($params['size']), function ($query) use ($params) {
+                $query->where('size', $params['size']);
+            })
+            ->when(!empty($params['crust']), function ($query) use ($params) {
+                $query->where('size', $params['size']);
+            })
+            ->when(!empty($params['type']), function ($query) use ($params) {
+                $query->where('size', $params['size']);
+            })
+            ->when(!empty($params['type']), function ($query) use ($params) {
+                $query->where('size', $params['size']);
+            })
+            ->groupBy('orders.id')
+            ->when(!empty($params['toppings']), function ($query) use ($params) {
+                $query->havingRaw("total >= " . $params['toppings']);
+            })
+            ->with([
+                'pizzas',
+                'topping_details'
+            ]);
     }
 }

@@ -13,9 +13,11 @@ class PMLParser
 
     const MAX_TOPPINGS_TAG_COUNT = 3;
 
-    private $pmlString;
-
-    private $xml;
+    const PIZZA_SIZE = [
+        "small",
+        "medium",
+        "large"
+    ];
 
     private $pizzaNodeList = [
         "size",
@@ -23,6 +25,11 @@ class PMLParser
         "type",
         "toppings"
     ];
+
+    private $pmlString;
+
+    private $xml;
+
 
     /**
      * Main parser method

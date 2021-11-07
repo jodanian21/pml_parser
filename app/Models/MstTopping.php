@@ -25,11 +25,11 @@ use Illuminate\Support\Facades\DB;
  */
 class MstTopping extends Model
 {
-    protected $table = 'mst_toppings';
+	protected $table = 'mst_toppings';
 
-    protected $fillable = [
-        'name'
-    ];
+	protected $fillable = [
+		'name'
+	];
 
     public function topping_details()
     {

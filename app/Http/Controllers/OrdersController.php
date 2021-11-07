@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\MstTopping;
-use App\Models\Order;
+use App\Models\{
+    Crust,
+    Order,
+    MstTopping,
+    Type
+};
 use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Jodan\PMLParser\PMLParser;
@@ -23,7 +27,7 @@ class OrdersController extends Controller
      */
     public function manualInput()
     {
-        $toppings = MstTopping::getToppingsCount()->get();
+        $toppings = MstTopping::all();
 
         return view('order.input', compact('toppings'));
     }
@@ -65,15 +69,23 @@ class OrdersController extends Controller
     /**
      * Display all order list
      */
-    public function list()
+    public function list(Request $request)
     {
-        $orders = Order::getOrderList()
-            ->paginate(10);
+        $orders = Order::getOrderList($request)
+            ->paginate(10)
+            ->withQueryString();
 
         $toppings = MstTopping::getToppingsCount()->get();
+        $crusts = Crust::all();
+        $types = Type::all();
 
         return view('order.list',
-            compact('orders', 'toppings')
+            compact(
+                'orders',
+                'toppings',
+                'crusts',
+                'types'
+            )
         );
     }
 }

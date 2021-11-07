@@ -7,7 +7,6 @@
 namespace App\Models;
 
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -16,6 +15,9 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $id
  * @property int $number
  * @property int $order_id
+ * @property string|null $size
+ * @property string|null $crust
+ * @property string|null $type
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * 

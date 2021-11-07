@@ -9,19 +9,65 @@
 <div class="mt-5">
     <h3><strong>Order List</strong></h3>
     <hr>
-    <table class="table table-bordered table-condensed">
-        <thead>
-          <tr>
-            <th scope="col">#</th>
-            <th> Pizza Details </th>
-          </tr>
-        </thead>
-        <tbody>
+    <p>
+        <a class="btn btn-success" data-toggle="collapse" href="#filterBox" role="button" aria-expanded="false" aria-controls="filterBox">
+            <i class="fa fa-filter"></i> Filter
+        </a>
+    </p>
+    <div class="collapse show" id="filterBox">
+        <div class="card card-body">
+            <form>
+                @php
+                    $query = request()->query();
+                @endphp
+                <div class="form-group row">
+                    <div class="col-sm-2 m-1">
+                        <select name="size" class="form-control">
+                            <option value="" disabled {{ empty($query['size']) ? 'selected' : '' }}>Size</option>
+                            <option {{ !empty($query['size']) && $query['size'] == 'small' ? 'selected' : '' }}>small</option>
+                            <option {{ !empty($query['size']) && $query['size'] == 'medium' ? 'selected' : '' }}>medium</option>
+                            <option {{ !empty($query['size']) && $query['size'] == 'large' ? 'selected' : '' }}>large</option>
+                        </select>
+                    </div>
+
+                    <div class="col-sm-2 m-1">
+                        <select name="crust" class="form-control">
+                            <option value="" disabled {{ empty($query['crust']) ? 'selected' : '' }}>Crust</option>
+                            @foreach ($crusts as $crust)
+                                <option {{ !empty($query['crust']) && $query['crust'] == $crust->name ? 'selected' : '' }} value="{{ $crust->name }}"> {{ $crust->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-sm-3 m-1">
+                        <select name="type" class="form-control" value="{{ request()->query()['size'] ?? '' }}">
+                            <option value="" disabled {{ empty($query['type']) ? 'selected' : '' }}>Type</option>
+                            @foreach ($types as $type)
+                                <option {{ !empty($query['type']) && $query['type'] == $type->name ? 'selected' : '' }} value="{{ $type->name }}"> {{ $type->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-sm-2 m-1">
+                        <input type="number" name="toppings" class="form-control" min="0" max="12" placeholder="No of Toppings (upto)" value="{{ request()->query()['toppings'] ?? '' }}">
+                    </div>
+
+                    <div class="col-sm-2 m-1">
+                        <a href="{{ route('list') }}" class="btn btn-secondary">Reset</a>
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                    </div>
+                </div>
+            </form>
+      </div>
+    </div>
+
+    <div class="col col-md-12 mt-2">
+        <div class="row justify-content-md-center">
+
             @foreach ($orders as $order)
-                <tr>
-                    <th scope="row">{{ $order->id }}</th>
-                    <td> 
-                        <h5>Order {{ $order->number }}</h5>
+                <div class="card text-white m-3 bg-dark" style="max-width: 18rem;">
+                    <h4 class="card-header bg-success">Order # {{ $order->number }}</h4>
+                    <div class="card-body">
                         @foreach ($order->pizzas as $pizza)
                             <strong>Pizza {{ $pizza->number }} </strong>-
                             {{ $pizza->size }},
@@ -83,13 +129,13 @@
                                 @endforeach
                             @endif
                         </div>
-                        <hr>
                         @endforeach
-                    </td>
-                </tr>
+                    </div>
+                </div>
             @endforeach
-        </tbody>
-      </table>
+
+        </div>
+    </div>
       {{ $orders->links('component.pagination') }}
 </div>
 
